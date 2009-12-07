@@ -1,0 +1,18 @@
+Database ->
+(
+    Name -> test2,
+    Host -> localhost,
+    Port -> 3306,
+    Username -> root,
+    Password -> pass
+)
+
+InputFormat ->
+(
+    Names ->
+    (
+        FirstNameID -> FirstNames.FirstName,
+        LastName
+    )
+)
+

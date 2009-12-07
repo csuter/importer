@@ -1,0 +1,5 @@
+Chris Suter { Programmer, Mathematician, Pianist }
+Travis Whitton { Programmer, DBA, Guitarist, Vocalist }
+Myke Stubbs { Programmer, "Web Developer", "Indie Music Lover" }
+Jet Dong { Programmer, Groovesharker, "Kick Boxer" }
+Chris Bates { Programmer, Engineer, "Machine Learning Guru" }

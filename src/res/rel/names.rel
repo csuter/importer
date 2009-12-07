@@ -1,0 +1,17 @@
+Database ->
+(
+    Name -> test1,
+    Host -> localhost,
+    Port -> 3306,
+    Username -> root,
+    Password -> pass
+)
+
+InputFormat ->
+(
+    Names ->
+    (
+        FirstName,
+        LastName
+    )
+)

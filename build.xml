@@ -1,0 +1,210 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<project name='importer' default='most'>
+
+	<property name='module.name' 			value='importer'/>
+	<property name='module.version' 		value='0.1.7'/>
+	<property name='module.isRunnable'		value='true'/>
+	
+	<property name='module.jar.name' 		value='${module.name}-${module.version}.jar'/>
+	<property name='module.test.jar.name' 	value='${module.name}-${module.version}-test.jar'/>
+    <property name='test.data'              value='/home/cgs/dev/emg/current/importer/src/res/data/names_roles.txt'/>
+    <property name='test.rel'               value='/home/cgs/dev/emg/current/importer/src/res/rel/names_roles.rel'/>
+
+	<property name='src.dir' 				value='src'/>
+	<property name='src.conf.dir' 			value='${src.dir}/conf'/>
+	<property name='src.lib.dir' 			value='${src.dir}/lib'/>
+	<property name='src.main.dir' 			value='${src.dir}/main'/>
+	<property name='src.test.dir' 			value='${src.dir}/test'/>
+	<property name='src.bin.dir' 			value='${src.dir}/bin'/>
+	<property name='src.res.dir' 			value='${src.dir}/res'/>
+
+	<property name='src.main.java.dir' 		value='${src.main.dir}/java'/>
+	<property name='src.test.java.dir' 		value='${src.test.dir}/java'/>
+
+	<property name='build.dir' 				value='build'/>
+	<property name='classes.dir' 			value='${build.dir}/classes'/>
+	<property name='jars.dir' 				value='${build.dir}/jars'/>
+
+	<property name='run.dir' 				value='${build.dir}/${module.name}'/>
+	<property name='run.bin.dir' 			value='${run.dir}/bin'/>
+	<property name='run.res.dir' 			value='${run.dir}/res'/>
+	<property name='run.conf.dir' 			value='${run.dir}/conf'/>
+	<property name='run.lib.dir' 			value='${run.dir}/lib'/>
+	<property name='run.script.name' 		value='${module.name}'/>
+
+	<property name='test.dir' 				value='${build.dir}/test'/>
+	<property name='test.reports.dir' 		value='${test.dir}/reports'/>
+	<property name='test.classes.dir' 		value='${test.dir}/classes'/>
+	<property name='test.conf.dir' 			value='${test.dir}/conf'/>
+	<property name='test.run.dir' 			value='${test.dir}/run'/>
+	<property name='test.lib.dir' 			value='${test.dir}/lib'/>
+
+    <property name='dist.dir'               value='dist'/>
+    <property name='dist.name'              value='${module.name}-${module.version}'/>
+    <property name='dist.tarfile'           value='${dist.dir}/${dist.name}.tgz'/>
+
+	<path id='compile.classpath'>
+		<fileset dir='${src.lib.dir}'>
+			<include name='*.jar'/>
+		</fileset>
+	</path>
+
+	<path id='runtime.classpath'>
+		<fileset dir='${run.lib.dir}'/>
+	</path>
+
+
+	<path id='test.run.classpath'>
+		<fileset dir='${test.conf.dir}'/>
+		<fileset dir='${test.lib.dir}'/>
+		<fileset dir='${jars.dir}'/>
+	</path>
+	
+	<path id='test.compile.classpath'>
+		<fileset dir='${jars.dir}'/>
+		<fileset dir='${src.lib.dir}'/>
+	</path>
+
+	
+	<target name='all' depends='build,package,run-init'/>
+	<target name='most' depends='build,package'/>
+	<target name='build' depends='build-source'/>
+	<target name='package' depends='package-jars'/>
+
+    <target name='dist' depends='run-init,dist-init'>
+        <tar destfile='${dist.tarfile}'
+            basedir='${dist.dir}'
+            compression='gzip'>
+            <include name='${dist.name}/**/*'/>
+        </tar>
+    </target>
+
+    <target name='dist-init' depends='dist-env-init'>
+        <copy todir='${dist.dir}/${dist.name}'>
+            <fileset dir='${run.dir}'/>
+		</copy>
+    </target>
+
+    <target name='dist-env-init'>
+        <mkdir dir='${dist.dir}'/>
+        <mkdir dir='${dist.dir}/${dist.name}'/>
+    </target>
+
+	<target name='run' depends='run-init'>
+		<exec executable='${run.bin.dir}/${run.script.name}'>
+            <arg line='${test.data} ${test.rel}'/>
+		</exec>
+	</target>
+    
+    <target name='run-hprof' depends='run-init'>
+		<exec executable='${run.bin.dir}/${run.script.name}'>
+			<arg line='hprof'/>
+		</exec>
+	</target>
+
+
+	<target name='test' depends='most,test-package'>
+		<junit dir='${test.dir}' printsummary="yes" haltonfailure="no" showoutput="yes">
+			<classpath>
+				<path refid="test.run.classpath"/>
+				<pathelement location='${test.conf.dir}'/>
+			</classpath>
+
+			<formatter type="plain"/>
+
+			<batchtest fork="yes" todir="${test.reports.dir}">
+				<fileset dir="${src.test.java.dir}">
+					<include name="**/*TestCase*.java"/>
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name='test-package' depends='test-compile'>
+		<jar basedir='${test.classes.dir}' destfile='${test.lib.dir}/${module.test.jar.name}'/>
+	</target>
+
+	<target name='test-compile' depends='test-init'>
+		<javac srcdir='${src.test.java.dir}' destdir='${test.classes.dir}' debug='true' debuglevel='lines,source,vars'>
+			<classpath>
+				<path refid='test.compile.classpath'/>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name='test-init'>
+		<mkdir dir='${test.classes.dir}'/>
+		<mkdir dir='${test.lib.dir}'/>
+		<mkdir dir='${test.run.dir}'/>
+		<mkdir dir='${test.conf.dir}'/>
+		<mkdir dir='${test.reports.dir}'/>
+		<copy todir='${test.lib.dir}'>
+			<fileset dir='${jars.dir}'/>
+			<fileset dir='${src.lib.dir}'/>
+		</copy>
+		<copy todir='${test.conf.dir}'>
+			<fileset dir='${src.conf.dir}'>
+				<include name='log4j.properties'/>
+			</fileset>
+		</copy>
+	</target>
+
+
+	<target name='run-init' depends='most,run-env-init'>
+		<copy todir='${run.lib.dir}'>
+			<fileset dir='${jars.dir}'/>
+			<fileset dir='${src.lib.dir}'>
+				<exclude name='junit-*.jar'/>
+			</fileset>
+		</copy>
+		<copy todir='${run.conf.dir}'>
+			<fileset dir='${src.conf.dir}'/>
+		</copy>
+		<copy todir='${run.bin.dir}'>
+			<fileset dir='${src.bin.dir}'/>
+		</copy>
+		<copy todir='${run.res.dir}'>
+			<fileset dir='${src.res.dir}'/>
+		</copy>
+		<chmod file='${run.bin.dir}/${run.script.name}' perm='0755'/>
+	</target>
+
+	<target name='run-env-init'>
+		<mkdir dir='${run.lib.dir}'/>
+		<mkdir dir='${run.conf.dir}'/>
+		<mkdir dir='${run.bin.dir}'/>
+	</target>
+
+
+	<target name='build-source' depends='build-init'>
+		<javac srcdir='${src.main.java.dir}'
+			destdir='${classes.dir}'
+			debug='true'
+			debuglevel='lines,source,vars'>
+			<compilerarg value='-Xlint'/>
+			<classpath>
+				<path refid='compile.classpath'/>
+			</classpath>
+		</javac>
+	</target> 
+
+	<target name='build-init'>
+		<mkdir dir='${classes.dir}'/>
+	</target>
+
+
+	<target name='package-jars' depends='package-init'>
+		<jar basedir='${classes.dir}' destfile='${jars.dir}/${module.jar.name}'/>
+	</target>
+	<target name='package-init'>
+		<mkdir dir='${jars.dir}'/>
+	</target>
+
+
+	<target name='clean'>
+		<delete dir='${build.dir}'/>
+	</target>
+
+</project>
+

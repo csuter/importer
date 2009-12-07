@@ -1,0 +1,21 @@
+#!/bin/bash
+
+VERSION="0.1.0"
+EXEC_DIR=`dirname "$0"`
+
+cd $EXEC_DIR/..
+IMPORTER_HOME=`pwd`
+PROJECT_MAIN="importer.Main"
+JAVA_OPTS=""
+
+LIB_DIR="$IMPORTER_HOME/lib"
+
+for i in `ls $LIB_DIR`
+do
+    PROJECT_CLASSPATH="$PROJECT_CLASSPATH:$LIB_DIR/$i"
+done
+
+
+JAVA="/usr/bin/java"
+
+$JAVA $JAVA_OPTS -classpath "$PROJECT_CLASSPATH" "$PROJECT_MAIN" "$@"
